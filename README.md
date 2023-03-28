@@ -205,4 +205,4 @@ To combine all posteriors when $k = 1$ stored in the folder `posteriors_k1`, use
 gwcosmo_coasting_combined_posterior --dir posteriors_k1 --outputfile combined_all_k1
 ```
 
-The outputfiles will be `combined_all_k1.npz` which contains `[H0,likelihood_comb,posterior_uniform_norm,posterior_log_norm]` and the figure `combined_all_k1.png`.# gwcosmo_coasting_dev
+The outputfiles will be `combined_all_k1.npz` which contains `[H0,likelihood_comb,posterior_uniform_norm,posterior_log_norm]` and the figure `combined_all_k1.png`.
