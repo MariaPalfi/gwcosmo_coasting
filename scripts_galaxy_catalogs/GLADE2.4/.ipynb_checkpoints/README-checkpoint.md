@@ -1,0 +1,1 @@
+The GLADE2.4 catalog has been created using [this script](https://git.ligo.org/cbc-cosmo/gwcosmo/-/blob/pending_review/scripts_galaxy_catalogs/GLADE2.4/make_glade_catalog.py) and by downloading the GLADE2.4 txt file from [here](http://aquarius.elte.hu/glade/GLADE_2.4.txt).

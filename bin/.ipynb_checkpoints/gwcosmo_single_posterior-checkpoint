@@ -1,0 +1,451 @@
+#!/usr/bin/env python3
+
+"""
+This script computes posterior on H0 using a single gravitational wave event
+and an electromagnetic counterpart.
+
+Ignacio Magana, Rachel Gray, Ankan Sur
+Modified by Mária Pálfi (2023)
+"""
+# System imports
+import pkg_resources
+import os
+import sys
+from optparse import Option, OptionParser, OptionGroup
+import pickle
+import multiprocessing as mp
+
+#Global Imports
+import matplotlib
+matplotlib.use('agg')
+import matplotlib.pyplot as plt
+matplotlib.rcParams['font.family']= 'Times New Roman'
+matplotlib.rcParams['font.sans-serif']= ['Bitstream Vera Sans']
+matplotlib.rcParams['text.usetex']= True
+matplotlib.rcParams['mathtext.fontset']= 'stixsans'
+
+import seaborn as sns
+sns.set_context('paper')
+sns.set_style('ticks')
+sns.set_palette('colorblind')
+
+import numpy as np
+
+import gwcosmo
+from gwcosmo.utilities.posterior_utilities import confidence_interval
+from gwcosmo.utilities.redshift_utilities import zhelio_to_zcmb
+from gwcosmo.utilities.coasting_cosmology import * # use the coasting_cosmology, changed by Mária Pálfi
+from gwcosmo.utilities.schechter_params import * 
+from gwcosmo.utilities.schechter_function import *
+from gwcosmo.prior.catalog import load_catalog_from_opts
+
+import astropy.constants as const
+speed_of_light = const.c.to('km/s').value
+data_path = pkg_resources.resource_filename('gwcosmo', 'data/')
+
+def str2bool(v):
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
+# Command line options
+parser = OptionParser(
+    description = __doc__,
+    usage = "%prog [options]",
+    option_list = [
+        Option("--method", default=None,
+            help="counterpart, statistical, population, pixel (required)"),
+        Option("--min_H0", default=20.0, type=float,
+            help="Minimum value of H0"),
+        Option("--max_H0", default=200.0, type=float,
+            help="Maximum value of H0"),
+        Option("--bins_H0", default=200, type=int,
+            help="Number of H0 bins"),
+        Option("--posterior_samples", default=None,
+            help="Path to LALinference posterior samples file in format (.dat or hdf5)"),
+        Option("--posterior_samples_field", default=None,
+            help="Internal field of the posterior samples file, e.g. h5 or json field"),
+        Option("--skymap", default=None,
+            help="Path to LALinference 3D skymap file in format (.fits or fits.gz)"),
+        Option("--Pdet", default=None,
+            help="Path to precomputed probability of detection pickle"),
+        Option("--redshift_uncertainty", default='True',
+            help="Marginalise over redshift uncertainties (default=True)"),
+        Option("--counterpart_ra", default=None,
+            help="Right ascension of counterpart"),
+        Option("--counterpart_dec", default=None,
+            help="Declination of counterpart"),
+        Option("--counterpart_z", default=None,
+            help="Redshift of counterpart (in CMB frame)"),
+        Option("--counterpart_sigmaz", default=None,
+            help="Uncertainty of counterpart in redshift"),
+        Option("--counterpart_v", default=None,
+            help="Recessional velocity of counterpart in km/sec (in CMB frame)"),
+        Option("--counterpart_sigmav", default=None,
+            help="Uncertainty of counterpart in km/sec"),
+        Option("--redshift_evolution", default='None',
+            help="Allow GW host probability to evolve with redshift. Select between None, PowerLaw or Madau (Default=None)"),
+        Option("--Lambda", default=3.0, type=float,
+            help="Set rate evolution parameter Lambda for redshift evolution (For Madau model this is equal to alpha)"),
+        Option("--Madau_beta", default=3.0, type=float,
+            help="Set Beta for Madau model. (Not used if redshift_evolution=None or PowerLaw)"),
+        Option("--Madau_zp", default=0.0, type=float,
+            help="Set zp for Madau model. (Not used if redshift_evolution=None or PowerLaw)"),
+        Option("--Kcorrections", default='False',
+            help="Apply K-corrections."),
+        Option("--reweight_posterior_samples", default='True',
+            help="Reweight posterior samples with the same priors used to calculate the selection effects."),
+        Option("--zmax", default=10.0, type=float,
+            help="Upper redshift limit for integrals (default=10)"),
+        Option("--galaxy_weighting", default='True',
+            help="Weight potential host galaxies by luminosity? (Default=True)"),
+        Option("--assume_complete_catalog", default='False',
+            help="Assume a complete catalog? (Default=False)"),
+        Option("--zcut", default=None,
+            help="Hard redshift cut to apply to the galaxy catalogue (default=%default)"),
+        Option("--mth", default=None,
+            help="Override the apparent magnitude threshold of the catalogue, if provided (default=None)"),
+        Option("--schech_alpha", default=None,
+            help="Override the default value for slope of schechter function for given band, if provided (default=None)"),
+        Option("--schech_Mstar", default=None,
+            help="Override the default value for Mstar of schechter function for given band, if provided (default=None)"),
+        Option("--schech_Mmin", default=None,
+            help="Override the default value for Mmin of schechter function for given band, if provided (default=None)"),
+        Option("--schech_Mmax", default=None,
+            help="Override the default value for Mmax of schechter function for given band, if provided (default=None)"),
+        Option("--nside", default=32, type=int,
+            help="skymap nside choice for reading in galaxies from the overlap of catalogue and skymap (default=32)"),
+        Option("--sky_area", default=0.999, type=float,
+            help="contour boundary for galaxy catalogue method (default=0.999)"),
+        Option("--pixel_index", default=0, type=int,
+            help="index of the skymap pixel to analyse (for use with pixel method only)"),
+        Option("--min_pixels", default=30, type=int,
+            help="minimum number of pixels desired to cover sky area of event (for use with pixel method only)"),
+        Option("--return_skymap_indices", default='False',
+            help="Return the skymap indices needed to run the pixelated method (for use with pixel method only)"),
+        Option("--combine_pixels", default='False',
+            help="combine multiple pixels to make the full likelihood for an event. Folder must contain pixel likelihoods and pixel indices file. (for use with pixel method only)"),
+        Option("--outputfile", default='Posterior',
+            help="Name of output file"),
+        Option("--seed", default=None, type=int, help="Random seed"),
+        Option("--numerical", default='True', type=str, 
+            help="If set to true numerical integration will be used for the calculation of integrals")
+    ])
+
+catalog_option_group = OptionGroup(parser, "Galaxy Catalog Options","""
+Use these options to control the galaxy catalog input"""
+)
+# Add the catalog options
+for opt in gwcosmo.prior.catalog.catalog_options:
+    catalog_option_group.add_option(opt)
+
+parser.add_option_group(catalog_option_group)
+
+opts, args = parser.parse_args()
+print(opts)
+
+np.random.seed(opts.seed)
+
+# Check for missing required arguments
+missing = []
+for option in parser.option_list:
+    if 'required' in option.help and eval('opts.' + option.dest) == None:
+        missing.extend(option._long_opts)
+if len(missing) > 0:
+    parser.error('Missing required options: {0}'.format(str(missing)))
+
+outputfile = str(opts.outputfile)
+
+combine_pixels = str2bool(opts.combine_pixels)
+if combine_pixels:
+    low_res_nside = np.genfromtxt(outputfile+'_indices.txt',dtype=int,max_rows=1)[1]
+    opts.low_res_nside = low_res_nside
+    pixels = np.genfromtxt(outputfile+'_indices.txt',dtype=int, skip_header=1)
+    H0 = np.load(outputfile+'_pixel_{}.npz'.format(pixels[0]),allow_pickle=True)['H0'] # changed by Mária Pálfi, because np.savez can not handle arrays with different sizes as in the original code, use ['H0'] instead of ['arr_0'][0]
+    dH0 = H0[1] - H0[0]
+    min_H0 = np.amin(H0)
+    max_H0 = np.amax(H0)
+    print('Combining {} pixels'.format(len(pixels)))
+    likelihoods = np.zeros([len(H0),len(pixels)])
+    for i, idx in enumerate(pixels):
+        likelihoods[:,i] = np.load(outputfile+'_pixel_{}.npz'.format(idx),allow_pickle=True)['likelihood'] # changed by Mária Pálfi, because np.savez can not handle arrays with different sizes as in the original code, use ['likelihood'] instead of ['arr_0'][1]
+    likelihood = np.sum(likelihoods,axis=1)
+
+else:
+    print('Selected method is:', opts.method)
+
+    if (opts.posterior_samples is None):
+        parser.error('Currently all methods are implemented to work with posterior samples. \
+                      We are working to add skymap compatability as soon as possible.')
+
+    if opts.Pdet is None:
+        parser.error('Provide a precomputed probability of detection.')
+
+    if opts.posterior_samples is not None:
+        posterior_samples = str(opts.posterior_samples)
+
+    if opts.posterior_samples_field is not None:
+        posterior_samples_field = str(opts.posterior_samples_field)
+    else:
+        posterior_samples_field = None
+
+    min_H0 = float(opts.min_H0)
+    max_H0 = float(opts.max_H0)
+    bins_H0 = int(opts.bins_H0)
+    H0 = np.linspace(min_H0, max_H0, bins_H0)
+    dH0 = H0[1] - H0[0]
+
+    redshift_evolution = str(opts.redshift_evolution)
+    Lambda = float(opts.Lambda)
+    madau_beta = float(opts.Madau_beta)
+    madau_zp = float(opts.Madau_zp)
+    reweight_samples = str2bool(opts.reweight_posterior_samples)
+    outputfile = str(opts.outputfile)
+    pdet_path = str(opts.Pdet)
+    zmax = float(opts.zmax)
+    numerical = str2bool(opts.numerical)
+    return_skymap_indices = str2bool(opts.return_skymap_indices)
+    pixel_index = int(opts.pixel_index)
+
+    pdet = pickle.load(open(pdet_path, 'rb'))
+    mass_distribution = pdet.mass_distribution
+    mass_slope, psd, Mmin, Mmax, network_snr_threshold = pdet.alpha, pdet.asd, pdet.Mmin, pdet.Mmax, pdet.snr_threshold
+    mass_slope_2, beta, sigma_g, lambda_peak, mu_g, delta_m, b = pdet.alpha_2, pdet.beta, pdet.sigma_g, pdet.lambda_peak, pdet.mu_g, pdet.delta_m, pdet.b
+
+    hyper_params_dict = {'alpha':mass_slope,'alpha_2':mass_slope_2,'mmin':Mmin,'mmax':Mmax,'beta':beta,'sigma_g':sigma_g,'lambda_peak':lambda_peak,
+                         'mu_g':mu_g,'delta_m':delta_m,'b':b}
+
+
+    print('Loading precomputed pdet with a {} mass distribution at {} sensitivity assuming an SNR threshold of {}.'.format(mass_distribution, psd, network_snr_threshold))
+    if mass_distribution == 'BBH-powerlaw' or mass_distribution == 'NSBH-powerlaw':
+        print('{:s} mass distribution with parameters: alpha=-{}, beta={}, Mmin={}, Mmax={}'.format(mass_distribution,mass_slope, beta, Mmin, Mmax))
+    elif mass_distribution == 'BBH-powerlaw-gaussian' or mass_distribution == 'NSBH-powerlaw-gaussian':
+        print('{:s} mass distribution with parameters: alpha=-{}, beta={}, Mmin={}, Mmax={}, lambda_peak={}, mu={}, sigma={}, delta={}'.format(mass_distribution,
+                                                       mass_slope, beta, Mmin, Mmax, lambda_peak, mu_g, sigma_g, delta_m))
+    elif mass_distribution == 'BBH-broken-powerlaw' or mass_distribution == 'NSBH-broken-powerlaw':
+        print('{:s} mass distribution with parameters: alpha_1=-{}, alpha_2=-{}, beta={}, Mmin={}, Mmax={}, b={}, delta={}'.format(mass_distribution,
+                                                       mass_slope, mass_slope_2, beta, Mmin, Mmax, b, delta_m))
+
+
+    k = pdet.k # added by Mária Pálfi
+    cosmo = fast_cosmology(k)
+    zprior = redshift_prior(k)
+
+    hyper_params_evolution = {'model':redshift_evolution,'Lambda':Lambda,'madau_beta':madau_beta,'madau_zp':madau_zp}
+
+    if redshift_evolution=='PowerLaw':
+        ps_z = gwcosmo.gwcosmo.RedshiftEvolutionPowerLaw(hyper_params_evolution)
+    elif redshift_evolution=='Madau':
+        ps_z = gwcosmo.gwcosmo.RedshiftEvolutionMadau(hyper_params_evolution)
+    elif redshift_evolution=='None':
+        ps_z = gwcosmo.gwcosmo.RedshiftNonEvolution(hyper_params_evolution)
+
+    print('Setting up a cosmology with k={}'.format(k)) # changed by Mária Pálfi
+
+    # Once different methods can run with just skymap (instead of samples) this will need moving
+    if opts.posterior_samples is not None:
+        print("Loading posterior samples")
+        samples = gwcosmo.likelihood.posterior_samples.posterior_samples(cosmo,posterior_samples=posterior_samples,field=posterior_samples_field)
+        if opts.method == 'counterpart' or opts.method == 'population' or opts.method == 'statistical':
+            print("Setting up p(x|z,H0)")
+            px_zH0 = gwcosmo.likelihood.posterior_samples.make_px_function(samples, H0, k, hyper_params_dict, name=mass_distribution, reweight_samples=reweight_samples)
+
+    if opts.skymap is not None:
+        skymap_path = str(opts.skymap)
+        skymap = gwcosmo.likelihood.skymap.skymap(skymap_path)
+
+    if not opts.method in ['counterpart','population','pixel','statistical']:
+        raise ValueError(f"Unknown --method {opts.method}. Valid methods are counterpart, statistical, population or pixel")
+    if opts.method == 'counterpart':
+        ### This method currently only works with posterior samples which are already
+        ### marginalised along the LOS of the counterpart.
+        ### TODO: get this working for regular posterior samples.
+        ### TODO: get this working with a skymap and no samples.
+        if (opts.counterpart_z is None and opts.counterpart_v is None):
+            parser.error('Provide either counterpart redshift or recessional velocity.')
+
+        if (opts.counterpart_z is not None and opts.counterpart_v is not None):
+            print('Both counterpart redshift and recessional velocity provided. Using recessional velocity.')
+
+        if (opts.posterior_samples is not None and opts.skymap is not None):
+            print('Both posterior samples and skymap provided. Using posterior samples.')
+
+        if opts.counterpart_ra is not None:
+            counterpart_ra = float(opts.counterpart_ra)
+        if opts.counterpart_dec is not None:
+            counterpart_dec = float(opts.counterpart_dec)
+        if opts.counterpart_z is not None:
+            counterpart_z = float(opts.counterpart_z)
+        if opts.counterpart_sigmaz is not None:
+            counterpart_sigmaz = float(opts.counterpart_sigmaz)
+        if opts.counterpart_v is not None:
+            counterpart_v = float(opts.counterpart_v)
+            counterpart_z = counterpart_v/speed_of_light
+        if opts.counterpart_sigmav is not None:
+            counterpart_sigmav = float(opts.counterpart_sigmav)
+            counterpart_sigmaz = counterpart_sigmav/speed_of_light
+
+        me = gwcosmo.gwcosmo.DirectCounterpartLikelihood(counterpart_z,counterpart_sigmaz,px_zH0,pdet.pD_zH0_eval,zprior,ps_z,zmax=zmax)
+
+    if opts.method == 'population':
+
+        me = gwcosmo.gwcosmo.EmptyCatalogLikelihood(px_zH0,pdet.pD_zH0_eval,zprior,ps_z,zmax=zmax, numerical=numerical)
+
+    if opts.method == 'statistical' or opts.method == 'pixel':
+
+        if (opts.skymap is None):
+            parser.error('Provide a gravitational wave skymap')
+
+        band = str(opts.catalog_band)
+        catalog = load_catalog_from_opts(opts)
+        Kcorr = str2bool(opts.Kcorrections)
+        zuncert = str2bool(opts.redshift_uncertainty)
+        galaxy_weighting = str2bool(opts.galaxy_weighting)
+        nside = int(opts.nside)
+        sky_area = float(opts.sky_area)
+        complete_catalog = str2bool(opts.assume_complete_catalog)
+        if opts.mth is not None:
+            mth = float(opts.mth)
+        else:
+            mth = None
+        if opts.zcut is not None:
+            zcut = float(opts.zcut)
+        else:
+            zcut = None
+        if opts.schech_alpha is not None:
+            schech_alpha=float(opts.schech_alpha)    
+        else:
+            schech_alpha = None
+        if opts.schech_Mstar is not None:
+            schech_Mstar=float(opts.schech_Mstar)
+        else:
+            schech_Mstar = None
+        if opts.schech_Mmin is not None:
+            schech_Mmin=float(opts.schech_Mmin)
+        else:
+            schech_Mmin = None
+        if opts.schech_Mmax is not None:
+            schech_Mmax=float(opts.schech_Mmax)
+        else:
+            schech_Mmax = None
+
+        sp = SchechterParams(band, schech_alpha, schech_Mstar, schech_Mmin, schech_Mmax)
+        print("Schechter function with parameters: alpha={}, Mstar={}, Mmin={}, Mmax={}, ".format(sp.alpha,  sp.Mstar, sp.Mmin, sp.Mmax))
+        p_M = SchechterMagFunction(Mstar_obs=sp.Mstar,alpha=sp.alpha)
+        print('Galaxy weighting:', galaxy_weighting)
+        if galaxy_weighting:
+            ps_M = gwcosmo.gwcosmo.LuminosityWeighting()
+        else:
+            ps_M = gwcosmo.gwcosmo.UniformWeighting()
+
+    if opts.method == 'statistical':
+
+        me = gwcosmo.gwcosmo.WholeSkyGalaxyCatalogLikelihood(catalog, skymap, band, sp, k, px_zH0, pdet.pD_zH0_eval, zprior, ps_z, p_M, ps_M, Kcorr=Kcorr, mth=mth, zcut=zcut, zmax=zmax,zuncert=zuncert, complete_catalog=complete_catalog, sky_thresh = opts.sky_area, nside=opts.nside, numerical=numerical )
+
+
+
+
+    if opts.method == 'pixel':
+
+        min_pixels = int(opts.min_pixels)
+        pixelated_samples = gwcosmo.likelihood.posterior_samples.make_pixel_px_function(samples, skymap, k, npixels=min_pixels, thresh=sky_area)
+        
+        nside_low_res = pixelated_samples.nside
+
+        if nside_low_res > nside:
+            raise ValueError(f'Low resolution nside {nside_low_res} is higher than high resolution nside {nside}. Try decreasing min_pixels or increasing nside.')
+
+        if return_skymap_indices:
+            # Make the catalog cache file
+            if not catalog.read_pixel_index_cache(nside_low_res):
+                print(f'No pixel index found for nside {nside_low_res}, generating now.')
+                catalog.build_pixel_index_file(nside_low_res)
+            with open(outputfile+f'_indices.txt','w') as file:
+                file.write(f'nside: {nside_low_res}\n')
+                for i in pixelated_samples.indices:
+                    file.write(f'{i}\n')
+
+            exit()
+
+        # Select the coarse pixel from the skymap that we will use
+        catalog = catalog.select_pixel(nside_low_res, pixel_index, nested=skymap.nested)
+
+        samp_ind = pixelated_samples.identify_samples(pixel_index, minsamps=100)
+        print("Setting up p(x|z,H0)")
+        px_zH0 = pixelated_samples.make_los_px_function(samp_ind,H0,hyper_params_dict,name=mass_distribution,reweight_samples=reweight_samples)
+
+        me = gwcosmo.gwcosmo.SinglePixelGalaxyCatalogLikelihood(pixel_index, catalog, skymap, band, sp, k,\
+                                                              px_zH0, pdet.pD_zH0_eval, zprior, ps_z, p_M, \
+                                                              ps_M, outputfile, Kcorr=Kcorr, mth=mth, zcut=zcut, \
+                                                              zmax=zmax,zuncert=zuncert, complete_catalog=complete_catalog, \
+                                                              nside=nside, nside_low_res = nside_low_res, numerical=numerical )
+
+    likelihood = me(H0)
+    pxG, pDG, pG, pxB, pDB, pB, pxO, pDO, pO = me.return_components()
+
+    if opts.method == 'pixel':
+        np.savez(outputfile+'_pixel_{}.npz'.format(pixel_index), H0 = H0, likelihood = likelihood, pxG = pxG, pDG = pDG, pG = pG, pxB = pxB, pDB = pDB, pB = pB, pxO = pxO, pDO = pDO, pO = pO ) # changed by Mária Pálfi
+        exit()
+    else:
+        np.savez(outputfile+'_likelihood_breakdown.npz', H0 = H0, likelihood = likelihood, pxG = pxG, pDG = pDG, pG = pG, pxB = pxB, pDB = pDB, pB = pB, pxO = pxO, pDO = pDO, pO = pO ) # changed by Mária Pálfi, because np.savez can not handle arrays with different sizes as in the original code
+
+prior_uniform = gwcosmo.prior.priors.pH0(H0,prior='uniform')
+posterior_uniform = prior_uniform*likelihood
+prior_log = gwcosmo.prior.priors.pH0(H0,prior='log')
+posterior_log= prior_log*likelihood
+
+prior_uniform_norm = prior_uniform/np.sum(prior_uniform*dH0)
+posterior_uniform_norm = posterior_uniform/np.sum(posterior_uniform*dH0)
+prior_log_norm = prior_log/np.sum(prior_log*dH0)
+posterior_log_norm = posterior_log/np.sum(posterior_log*dH0)
+
+np.savez(outputfile+'.npz', H0 = H0, likelihood = likelihood,posterior_uniform_norm = posterior_uniform_norm,posterior_log_norm = posterior_log_norm,opts = opts) # changed by Mária Pálfi, because np.savez can not handle arrays with different sizes as in the original code
+
+print("Uniform Prior")
+confidence_uniform = confidence_interval(posterior_uniform_norm,H0,level=0.683)
+MAP_uniform = confidence_uniform.map
+a_uniform = confidence_uniform.lower_level
+b_uniform = confidence_uniform.upper_level
+print('H0 = %.0f + %.0f - %.0f (MAP and 68.3 percent HDI)' %(MAP_uniform,b_uniform-MAP_uniform,MAP_uniform-a_uniform))
+
+print("Log Prior")
+confidence_log = confidence_interval(posterior_log_norm,H0,level=0.683)
+MAP_log = confidence_log.map
+a_log = confidence_log.lower_level
+b_log = confidence_log.upper_level
+print('H0 = %.0f + %.0f - %.0f (MAP and 68.3 percent HDI)' %(MAP_log,b_log-MAP_log,MAP_log-a_log))
+
+ymin = 0
+ymax = 1.1*max(posterior_log_norm)
+planck_h = 0.6774*100
+sigma_planck_h = 0.0062*100
+riess_h = 0.7324*100
+sigma_riess_h = 0.0174*100
+
+c=sns.color_palette('colorblind')
+plt.figure()
+plt.axvline(planck_h,label='Planck',color=c[4])
+plt.fill_betweenx([ymin,ymax],planck_h-2*sigma_planck_h,planck_h+2*sigma_planck_h,color=c[4],alpha=0.2)
+plt.axvline(riess_h,label='SH0ES',color=c[2])
+plt.fill_betweenx([ymin,ymax],riess_h-2*sigma_riess_h,riess_h+2*sigma_riess_h,color=c[2],alpha=0.2)
+plt.axvline(70,ls='--', color='k',alpha=0.8, label = r'$H_0 = 70$ (km s$^{-1}$ Mpc$^{-1}$)')
+plt.plot(H0,posterior_uniform_norm, linewidth = 3.0, label='Posterior (Uniform)',c=c[0])
+plt.axvline(a_uniform,ls='--',c=c[0])
+plt.axvline(b_uniform,ls='--',c=c[0])
+plt.plot(H0,posterior_log_norm,linewidth = 3.0, label='Posterior (Log)',c=c[1])
+plt.axvline(a_log,ls='--',c=c[1])
+plt.axvline(b_log,ls='--',c=c[1])
+plt.plot(H0,prior_uniform_norm,ls=':', linewidth = 3.0, label='Prior (Uniform)',c=c[0],alpha=0.6)
+plt.plot(H0,prior_log_norm,ls=':', linewidth = 3.0, label='Prior (Log)',c=c[1],alpha=0.6)
+plt.xlim(min_H0,max_H0)
+plt.ylim(ymin,ymax)
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+plt.xlabel(r'$H_0$ (km s$^{-1}$ Mpc$^{-1}$)',fontsize=16)
+plt.ylabel(r'$p(H_0)$ (km$^{-1}$ s Mpc)', fontsize=16)
+plt.legend(loc='upper right',fontsize=10)
+plt.tight_layout()
+plt.savefig(outputfile+'.png',dpi=200) # save png figures, changed by Mária Pálfi
