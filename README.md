@@ -99,7 +99,7 @@ And for neutron star - black hole mergers:
 gwcosmo_coasting_compute_pdet --k 0 --mass_distribution NSBH-powerlaw-gaussian --powerlaw_slope 3.78 --beta 0.81 --minimum_mass 4.98 --maximum_mass 112.5 --mu_g 32.27 --lambda_peak 0.03 --sigma_g 3.88 --delta_m 4.8 --b 0.5 --full_waveform True --Nsamps 150000 --constant_H0 True --snr 11.0 --detected_masses False --detectors HLV --det_combination True --seed 1000 --H0 100 --outputfile  constant_run_H0_100_k_0_BNS.p
 ```
 
-If you have the Pdets for each constant $H_0$ value which you want (we used minimum $H_0$ = 20, maximum $H_0$ = 140 and 100 bins), you can combine them with the following command:
+If you have the Pdets for each constant $H_0$ value you want (we used a minimum of $H_0$ = 20, a maximum of $H_0$ = 140 and 100 bins), you can combine them with the following command:
 
 ```
 gwcosmo_coasting_compute_pdet --combine path_to_the_folder_of_the_constant_H0_files
