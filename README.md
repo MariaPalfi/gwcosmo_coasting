@@ -2,7 +2,7 @@
 
 A package to estimate Hubble parameter of coasting cosmologies with curvature parameter k = \[-1, 0, 1\] using gravitational-wave observations. Created by Mária Pálfi (Eötvös University, Budapest, Hungary, e-mail: marika97@student.elte.hu) and Péter Raffai (Eötvös University, Budapest, Hungary). 
 
-This package is build upon the [**gwcosmo** ](https://git.ligo.org/lscsoft/gwcosmo) package described in  [R. Gray et al. Phys. Rev. D 101, 122001](https://journals.aps.org/prd/abstract/10.1103/PhysRevD.101.122001) and [R. Gray et al. arXiv:2111.04629](https://arxiv.org/abs/2111.04629).
+This package is built upon the [**gwcosmo** ](https://git.ligo.org/lscsoft/gwcosmo) package described in  [R. Gray et al. Phys. Rev. D 101, 122001](https://journals.aps.org/prd/abstract/10.1103/PhysRevD.101.122001) and [R. Gray et al. arXiv:2111.04629](https://arxiv.org/abs/2111.04629).
 
 If you use this code please cite this paper (link) .
 
@@ -63,7 +63,7 @@ pip install -e .
 # Data required for running **gwcosmo_coasting**
 
 ## Gravitational-wave data
-The gravitational-wave data required to the analysis are posterior samples (in hdf5 format) and skymaps (in fits format). These are publicly available through the [Gravitational Wave Open Science Center](https://www.gw-openscience.org/). The data of each releases can also be found on the following pages:
+The gravitational-wave (GW) data required to the analysis are posterior samples (in hdf5 format) and skymaps (in fits format). These are publicly available through the [Gravitational Wave Open Science Center](https://www.gw-openscience.org/). The data of each releases can also be found on the following pages:
 
 * [GWTC-1 posterior samples](https://dcc.ligo.org/LIGO-P1800370/public)
 
@@ -113,7 +113,7 @@ This should be run separately for the three types of mergers (BBH, BNS, NSBH). I
 A galaxy catalogue is required for the galaxy catalogue analysis, such as the GLADE 2.4 or the GLADE+ galaxy catalogues (see http://glade.elte.hu/). These catalogues have to be preprocessed with the scripts under `scripts_galaxy_catalogs/` folder.
 
 
-# Computing the posterior on $`H_0`$ for a single gravitational-wave event
+# Computing the posterior on `$H_0$` for a single gravitational-wave event
 Similar to the **gwcosmo** package, the main executable is `gwcosmo_coasting_single_posterior`, which calculates the posterior on $`H_0`$ for a single gravitational-wave event.
 
 There are 4 main options:
