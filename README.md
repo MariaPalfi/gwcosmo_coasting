@@ -104,7 +104,7 @@ If you have the Pdets for each constant $H_0$ value you want (we used a minimum 
 ```
 gwcosmo_coasting_compute_pdet --combine path_to_the_folder_of_the_constant_H0_files
 ```
-This should be run separately for the three type of mergers (BBH, BNS, NSBH). If you do not specify an output file name, you will get `BBH-powerlaw-gaussian_alpha_3.78_beta_0.81_Mmin_4.98_Mmax_112.5_mu_32.27_lambda_0.03_sigma_3.88_delta_4.8_Nsamps150000_full_waveform_snr_11.0_k_0.p` for binary black hole mergers with curvature parameter k = 0.
+This should be run separately for the three types of mergers (BBH, BNS, NSBH). If you do not specify an output file name, you will get `BBH-powerlaw-gaussian_alpha_3.78_beta_0.81_Mmin_4.98_Mmax_112.5_mu_32.27_lambda_0.03_sigma_3.88_delta_4.8_Nsamps150000_full_waveform_snr_11.0_k_0.p` for binary black hole mergers with curvature parameter k = 0.
 
 
 
