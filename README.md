@@ -194,7 +194,7 @@ to parallelise the analysis for the pixels, and combine them when finished.
 Each pixel will have an **eventname_pixel_i.npz** which is in the same format as **eventname_likelihood_breakdown.npz**, but the likelihood is only for the pixel under consideration. The final result is the **eventname.npz** and the figure **eventname.png**.
 
 
-# Combining the posteriors on $`H_0`$ from the single gravitational wave events
+# Combining the posteriors on $`H_0`$ from the single gravitational-wave events
 
 In order to get the final $H_0$ posterior we have to combine the posteriors from the individual gravitational wave events. We can use the  `gwcosmo_coasting_combined_posterior` for this task.
 
