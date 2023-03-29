@@ -80,20 +80,20 @@ The Pdets can be computed with the help of the `gwcosmo_coasting_compute_pdet` s
 
 First, run the `gwcosmo_coasting_compute_pdet` script with `--constant_H0 True` and `--H0 the_value_that_you_want` and name the output files differently after the `--outputfile` flag. You can process multiple calculations parallelly.
 
-For example, if you would like to calculate Pdets with curvature parameter $k=0$, $H_0 = 100$ (in km/s/Mpc units) for binary black holes and with the same mass distribution as used in the [O3 cosmology paper](https://arxiv.org/abs/2111.03604) main analysis, run the following command:
+For example, if you would like to calculate Pdets with curvature parameter $k=0$, $H_0 = 100$ (in km/s/Mpc units) for binary black holes (BBHs) and with the same mass distribution as used in the [O3 cosmology paper](https://arxiv.org/abs/2111.03604) main analysis, run the following command:
 
 
 ```
 gwcosmo_coasting_compute_pdet --k 0 --mass_distribution BBH-powerlaw-gaussian --powerlaw_slope 3.78 --beta 0.81 --minimum_mass 4.98 --maximum_mass 112.5 --mu_g 32.27 --lambda_peak 0.03 --sigma_g 3.88 --delta_m 4.8 --b 0.5 --full_waveform True --Nsamps 150000 --constant_H0 True --snr 11.0 --detected_masses False --detectors HLV --det_combination True --seed 1000 --H0 100 --outputfile constant_run_H0_100_k_0_BBH.p
 ```
 
-For binary neutron star mergers:
+For binary neutron star (BNS) mergers:
 
 ```
 gwcosmo_coasting_compute_pdet --k 0 --mass_distribution BNS --full_waveform True --Nsamps 50000 --constant_H0 True --snr 11.0 --detected_masses False --detectors HLV --det_combination True --seed 1000 --H0 100 --outputfile  constant_run_H0_100_k_0_BNS.p
 ```
 
-And for neutron star - black hole mergers:
+And for neutron star - black hole (NSBH) mergers:
 
 ```
 gwcosmo_coasting_compute_pdet --k 0 --mass_distribution NSBH-powerlaw-gaussian --powerlaw_slope 3.78 --beta 0.81 --minimum_mass 4.98 --maximum_mass 112.5 --mu_g 32.27 --lambda_peak 0.03 --sigma_g 3.88 --delta_m 4.8 --b 0.5 --full_waveform True --Nsamps 150000 --constant_H0 True --snr 11.0 --detected_masses False --detectors HLV --det_combination True --seed 1000 --H0 100 --outputfile  constant_run_H0_100_k_0_BNS.p
@@ -104,7 +104,7 @@ If you have the Pdets for each constant $H_0$ value you want (we used a minimum 
 ```
 gwcosmo_coasting_compute_pdet --combine path_to_the_folder_of_the_constant_H0_files
 ```
-This should be run separately for the three types of mergers (BBH, BNS, NSBH). If you do not specify an output file name, you will get `BBH-powerlaw-gaussian_alpha_3.78_beta_0.81_Mmin_4.98_Mmax_112.5_mu_32.27_lambda_0.03_sigma_3.88_delta_4.8_Nsamps150000_full_waveform_snr_11.0_k_0.p` for binary black hole mergers with curvature parameter k = 0.
+This should be run separately for the three types of mergers (BBH, BNS, NSBH). If you do not specify an output file name, you will get `BBH-powerlaw-gaussian_alpha_3.78_beta_0.81_Mmin_4.98_Mmax_112.5_mu_32.27_lambda_0.03_sigma_3.88_delta_4.8_Nsamps150000_full_waveform_snr_11.0_k_0.p` for binary black hole mergers and for a curvature parameter of k = 0.
 
 
 
