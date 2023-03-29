@@ -1,7 +1,5 @@
 # License
 
-The [GWCosmo Logo](etc/logo.png) needs to be designed.
-
 ### GNU GENERAL PUBLIC LICENSE
 
 Version 2, June 1991
