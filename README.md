@@ -1,6 +1,6 @@
 # gwcosmo_coasting
 
-A package to estimate Hubble parameter of coasting cosmologies with curvature parameter k = \[-1, 0, 1\] using gravitational-wave observations. Created by Mária Pálfi (Eötvös University, Budapest, Hungary) and Péter Raffai (Eötvös University, Budapest, Hungary). 
+A package to estimate Hubble parameter of coasting cosmologies with curvature parameter k = \[-1, 0, 1\] using gravitational-wave observations. Created by Mária Pálfi (Eötvös University, Budapest, Hungary, e-mail: marika97@student.elte.hu) and Péter Raffai (Eötvös University, Budapest, Hungary). 
 
 This package is build upon the [**gwcosmo** ](https://git.ligo.org/lscsoft/gwcosmo) package described in  [R. Gray et al. Phys. Rev. D 101, 122001](https://journals.aps.org/prd/abstract/10.1103/PhysRevD.101.122001) and [R. Gray et al. arXiv:2111.04629](https://arxiv.org/abs/2111.04629).
 
@@ -80,7 +80,7 @@ The Pdets can be computed with the help of the `gwcosmo_coasting_compute_pdet` s
 
 First, run the `gwcosmo_coasting_compute_pdet` script with `--constant_H0 True` and `--H0 the_value_that_you_want` and name the output files differently after the `--outputfile` flag. You can process multiple calculations parallelly.
 
-For example, if you would like to calculate the Pdets with curvature parameter $k=0$, $H_0 = 100$ for binary black holes and with same mass distribution as used in the [O3 cosmology paper](https://arxiv.org/abs/2111.03604) of the LVK in main analysis, run the following command:
+For example, if you would like to calculate Pdets with curvature parameter $k=0$, $H_0 = 100$ (in km/s/Mpc units) for binary black holes and with the same mass distribution as used in the [O3 cosmology paper](https://arxiv.org/abs/2111.03604) main analysis, run the following command:
 
 
 ```
