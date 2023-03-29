@@ -44,7 +44,7 @@ def dcH0overc(z, k):
     -------
     dimensionless combination dc*H0/c = ln(1+z) for k = 0
     dimensionless combination dc*H0/c = sin(ln(1+z)) for k = 1
-    dimensionless combination dc*H0/c = (z^2+2z)/(2*(z+1)) for k = -1
+    dimensionless combination dc*H0/c = sinh(ln(1+z)) = (z^2+2z)/(2*(z+1)) for k = -1
     """
     #print('k=', k)
     if k == 0:
