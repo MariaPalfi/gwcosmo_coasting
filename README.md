@@ -113,8 +113,8 @@ This should be run separately for the three types of mergers (BBH, BNS, NSBH). I
 A galaxy catalogue is required for the galaxy catalogue analysis, such as the GLADE 2.4 or the GLADE+ galaxy catalogues (see http://glade.elte.hu/). These catalogues have to be preprocessed with the scripts under `scripts_galaxy_catalogs/` folder.
 
 
-# Computing the posterior on $`H_0`$ for a single gravitational wave event
-Similar to **gwcosmo** package the main executable is `gwcosmo_coasting_single_posterior`, which calculates the posterior on $`H_0`$ for a single gravitational wave event.
+# Computing the posterior on $`H_0`$ for a single gravitational-wave event
+Similar to the **gwcosmo** package, the main executable is `gwcosmo_coasting_single_posterior`, which calculates the posterior on $`H_0`$ for a single gravitational-wave event.
 
 There are 4 main options:
 1. **The counterpart method:** the GW data is used in conjunction with a known associated host galaxy to measure $`H_0`$.
