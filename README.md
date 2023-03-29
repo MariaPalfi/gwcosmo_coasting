@@ -16,7 +16,7 @@ The name of the repository can be copied from the git interface (top right butto
 
 Complete the install by following one of the two options below. The package requires Python version 3.7 or newer to run (Python version 3.10 is recommended).
 
-The installation of the package works the same way as installation of **gwcosmo**.
+The installation of the package works the same way as installation of [**gwcosmo** ](https://git.ligo.org/lscsoft/gwcosmo).
 
 ## Installing with Anaconda
 
