@@ -74,7 +74,7 @@ The gravitational-wave data required to the analysis are posterior samples (in h
 * [GWTC-3 (O3b)](https://zenodo.org/record/5546663)
 
 ## Probability of detection
-Another necessary input of all the **gwcosmo_coasting** analyses is the gravitational wave probability of detection ("Pdet" for short), as a function of redshift and $`H_0`$, which allows **gwcosmo_coasting** to account for gravitational wave selection effects. The Pdets used in the analysis are available in the data folder.
+Another necessary input of all **gwcosmo_coasting** analyses is the gravitational-wave probability of detection ("Pdet" for short), as a function of redshift and $`H_0`$, which allows **gwcosmo_coasting** to account for gravitational-wave selection effects. The Pdets used in the analysis are available in the data folder.
 
 The Pdets can be computed with the help of the `gwcosmo_coasting_compute_pdet` script. Running `gwcosmo_coasting_compute_pdet --help` will show all the available flags that you can pass. 
 
