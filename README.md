@@ -110,7 +110,7 @@ This should be run separately for the three types of mergers (BBH, BNS, NSBH). I
 
 
 ## Galaxy catalogues
-A galaxy catalogue is required for the galaxy catalogue analysis, like GLADE 2.4 galaxy catalogue or the GLADE+ galaxy catalogue (see http://glade.elte.hu/). These catalogues has to be preprocessed with the scripts under `scripts_galaxy_catalogs/` folder.
+A galaxy catalogue is required for the galaxy catalogue analysis, such as the GLADE 2.4 or the GLADE+ galaxy catalogues (see http://glade.elte.hu/). These catalogues have to be preprocessed with the scripts under `scripts_galaxy_catalogs/` folder.
 
 
 # Computing the posterior on $`H_0`$ for a single gravitational wave event
