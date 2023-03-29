@@ -62,8 +62,8 @@ pip install -e .
 
 # Data required for running **gwcosmo_coasting**
 
-## Gravitational wave data
-The gravitational wave data required to the analysis are posterior samples (in hdf5 format) and skymaps (in fits format). These are publicly available through the [Gravitational Wave Open Science Center](https://www.gw-openscience.org/). The data of each releases can also be found on the following pages:
+## Gravitational-wave data
+The gravitational-wave data required to the analysis are posterior samples (in hdf5 format) and skymaps (in fits format). These are publicly available through the [Gravitational Wave Open Science Center](https://www.gw-openscience.org/). The data of each releases can also be found on the following pages:
 
 * [GWTC-1 posterior samples](https://dcc.ligo.org/LIGO-P1800370/public)
 
