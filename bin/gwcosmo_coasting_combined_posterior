@@ -3,7 +3,7 @@
 This script combines individual H0 posteriors.
 Ignacio Magana
 
-Modified by Mária Pálfi and Péter Raffai (2023)
+Modified by Mária Pálfi (Eötvös University, Budapest, Hungary, e-mail: marika97@student.elte.hu) and Péter Raffai (Eötvös University, Budapest, Hungary) (2023)
 """
 # System imports
 import os
