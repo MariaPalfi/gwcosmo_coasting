@@ -7,7 +7,8 @@ c : speed of light in km/s
 H0 : Hubble parameter
 k: curvature parameter of the coasting cosmology (-1, 0, or 1)
 
-Mária Pálfi and Péter Raffai (2023) based on standard_cosmology.py (Archisman Ghosh, 2013-Nov)
+Mária Pálfi (Eötvös University, Budapest, Hungary, e-mail: marika97@student.elte.hu) and Péter Raffai (Eötvös University, Budapest, Hungary) (2023)
+based on standard_cosmology.py (Archisman Ghosh, 2013-Nov)
 """
 
 import numpy as np
