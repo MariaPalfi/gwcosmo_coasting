@@ -1,7 +1,8 @@
 """
 Detection probability
 Rachel Gray, John Veitch, Ignacio Magana, Dominika Zieba
-Modified by Mária Pálfi and Péter Raffai (2023)
+Modified by Mária Pálfi (Eötvös University, Budapest, Hungary, e-mail: marika97@student.elte.hu)
+            and Péter Raffai (Eötvös University, Budapest, Hungary) (2023)
 """
 import lal
 import lalsimulation as lalsim
