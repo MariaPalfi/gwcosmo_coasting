@@ -1,7 +1,8 @@
 """
 gwcosmoLikelihood Module
 Rachel Gray, Archisman Ghosh, Ignacio Magana, John Veitch, Ankan Sur
-Modified by Mária Pálfi and Péter Raffai (2023)
+Modified by Mária Pálfi (Eötvös University, Budapest, Hungary, e-mail: marika97@student.elte.hu)
+            and Péter Raffai (Eötvös University, Budapest, Hungary) (2023)
 """
 from __future__ import absolute_import
 import numpy as np
