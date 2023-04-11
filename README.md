@@ -193,6 +193,9 @@ to parallelise the analysis for the pixels, and combine them when finished.
 
 Each pixel will have an **eventname_pixel_i.npz** which is in the same format as **eventname_likelihood_breakdown.npz**, but the likelihood is only for the pixel under consideration. The final result is the **eventname.npz** and the figure **eventname.png**.
 
+**Note** that in our analysis we set `--posterior_samples_field PublicationSamples` for O3a events. We set `--posterior_samples_field C01:Mixed` for GW190521 and O3b events, and `--posterior_samples_field C01:IMRPhenomNSBH` for NSBH events GW200105_162426 and GW200115_042309.
+
+
 
 # Combining the posteriors on $`H_0`$ from the single gravitational-wave events
 
