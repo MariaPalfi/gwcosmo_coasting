@@ -122,7 +122,7 @@ There are 4 main options:
 1. **The statistical method:** the GW data is used in conjunction with a galaxy catalogue which updates the redshift prior using known galaxies, and assumes uniform galaxy catalogue incompleteness across the sky-area of the GW event.
 1. **The pixel method:** an improvement to the statistical method, where its applied on a pixel-by-pixel basis.
 
-You can learn more about these on the [**gwcosmo** website](https://git.ligo.org/lscsoft/gwcosmo/-/tree/v1.0.0?ref_type=tags), these are similar in **gwcosmo_coasting**. By running
+By running
 ```
 gwcosmo_coasting_single_posterior --help
 ``` 
@@ -135,7 +135,7 @@ When running the counterpart, population or statistical methods, the output come
 
 **eventname_likelihood_breakdown.npz** contains `[H0, likelihood, pxG, pDG, pG, pxB, pDB, pB, pxO, pDO, pO]`, where `likelihood = (pxG / pDG) * pG + (pxB / pDB) * pB + (pxO / pDO) * pO`.
 
-We show some examples of the EM counterpart method and the pixelated method, which were used in the paper (link). The usage of the population and statistical (quick approximation) methods are similar as in the original [**gwcosmo** package](https://git.ligo.org/lscsoft/gwcosmo/-/tree/v1.0.0?ref_type=tags).
+We show some examples of the EM counterpart method and the pixelated method, which were used in the paper (link). 
 
 
 
@@ -155,7 +155,7 @@ gwcosmo_coasting_single_posterior --method counterpart --posterior_samples GW170
 This method needs GW posterior samples, GW skymap and a galaxy catalogue. It can take into account non-uniform catalogue and makes full use of GW data.
 
 
-It is recommended to use a cluster for this method to parallelise the analysis, otherwise it is very time consuming. Here, we only present how to generate and use a DAG for the pixelated method, but you can use your own computer and follow the steps described on the [**gwcosmo** website](https://git.ligo.org/lscsoft/gwcosmo/-/tree/v1.0.0?ref_type=tags).
+It is recommended to use a cluster for this method to parallelise the analysis, otherwise it is very time consuming. Here, we only present how to generate and use a DAG for the pixelated method, although you can run the `gwcosmo_coasting_single_posterior`  command with `--method pixel`.
 
 
 
