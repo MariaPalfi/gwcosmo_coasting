@@ -2,7 +2,7 @@
 
 A package to estimate Hubble parameter of coasting cosmologies with curvature parameter k = \[-1, 0, 1\] using gravitational-wave observations. Created by Mária Pálfi (Eötvös University, Budapest, Hungary, e-mail: marika97@student.elte.hu) and Péter Raffai (Eötvös University, Budapest, Hungary). 
 
-This package is built upon the [**gwcosmo** ]([https://git.ligo.org/lscsoft/gwcosmo](https://git.ligo.org/lscsoft/gwcosmo/-/tree/v1.0.0?ref_type=tags)) package described in  [R. Gray et al. Phys. Rev. D 101, 122001](https://journals.aps.org/prd/abstract/10.1103/PhysRevD.101.122001) and [R. Gray et al. arXiv:2111.04629](https://arxiv.org/abs/2111.04629).
+This package is built upon the [**gwcosmo** ](https://git.ligo.org/lscsoft/gwcosmo/-/tree/v1.0.0?ref_type=tags) package (version v1.0.0) described in  [R. Gray et al. Phys. Rev. D 101, 122001](https://journals.aps.org/prd/abstract/10.1103/PhysRevD.101.122001) and [R. Gray et al. arXiv:2111.04629](https://arxiv.org/abs/2111.04629).
 
 If you use this code please cite this paper (link) .
 
