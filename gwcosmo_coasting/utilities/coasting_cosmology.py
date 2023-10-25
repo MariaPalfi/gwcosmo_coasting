@@ -48,11 +48,12 @@ def dcH0overc(z, k):
     dimensionless combination dc*H0/c = sinh(ln(1+z)) = (z^2+2z)/(2*(z+1)) for k = -1
     """
     #print('k=', k)
+    val = np.nan
     if k == 0:
         val = np.log(1+z)
-    if k == 1:
+    elif k == 1:
         val = np.sin(np.log(1+z))
-    if k == -1:
+    elif k == -1:
         val = (z**2+2*z)/(2*z+2)
     return val
 
