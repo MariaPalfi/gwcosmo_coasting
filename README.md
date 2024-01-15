@@ -4,7 +4,7 @@ A package to estimate Hubble parameter of coasting cosmologies with curvature pa
 
 This package is built upon the [**gwcosmo** ](https://git.ligo.org/lscsoft/gwcosmo/-/tree/v1.0.0?ref_type=tags) package (version v1.0.0) described in  [R. Gray et al. Phys. Rev. D 101, 122001](https://journals.aps.org/prd/abstract/10.1103/PhysRevD.101.122001) and [R. Gray et al. arXiv:2111.04629](https://arxiv.org/abs/2111.04629).
 
-If you use this code, please cite [this paper](https://arxiv.org/abs/2310.16556).
+If you use this code, please cite [this paper](https://iopscience.iop.org/article/10.3847/1538-4357/ad1035).
 
 # How-to install
 
