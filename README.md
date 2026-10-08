@@ -28,7 +28,7 @@ Once the conda distribution is installed and activated on your machine, please f
 
 * Create a conda virtual environment to host gwcosmo_coasting. Use
 ```
-conda create -n gwcosmo_coasting pyton=3.10
+conda create -n gwcosmo_coasting python=3.10
 ```
 * When the virtual environment is ready, activate it with (your python distribution will change to `gwcosmo_coasting`)
 ```
